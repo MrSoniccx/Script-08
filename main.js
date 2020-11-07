@@ -6,6 +6,8 @@ var BtnEj3 = document.querySelector("#Search");
 var BtnEj4 = document.querySelector("#List");
 var BtnEj5 = document.querySelector("#ListInv");
 var BtnEj6 = document.querySelector("#Insert");
+var BtnEj7 = document.querySelector("#AddFirst");
+var BtnEj8 = document.querySelector("#DelFirst");
 
 var codigo = document.querySelector("#codigo");
 var nombre = document.querySelector("#nombre");
@@ -16,90 +18,132 @@ var pos = document.querySelector("#pos");
 
 
 var res = document.querySelector("#Description");
-var v = []
 
-var longitud = 0
+class Producto {
 
-class Main{
-  
-  llenar(){
-    for (let i=0;i!=20;i++)
-    {
-      v[i] = new Array ()
-    }
+  constructor(codigo, nombre, desc, cantidad, costo, total, next){
+    this.codigo = codigo
+    this.nombre = nombre
+    this.desc = desc
+    this.cantidad = cantidad
+    this.costo = costo
+    this.total = total
+    this.next = next
   }
-  check()
+}
+
+class Lista {
+  constructor()
   {
-    for (let i=0;i!=20;i++)
+    this.head = null
+    this.size = 0
+  }
+
+  check(codigo)
+  {
+    if(this.head == null){return false}
+    let aux=this.head
+    while(aux)
     {
-      if(v[i][0] == codigo.value)
-      {
-        return true
-      }
+      if(aux.codigo==codigo){return true}
+      aux = aux.next
     }
     return false
   }
-
-  search()
+  
+  search(codigo)
   {
-    for (let i=0;i!=20;i++)
+    if(this.head == null){return null}
+    let aux=this.head
+    while(aux)
     {
-      if(v[i][0] == codigo.value)
-      {
-        return i
+      if(aux.codigo==codigo){return aux}
+      aux = aux.next
+    }
+    return null
+  }
+
+  agregarFinal(item)
+  {
+    let nuevo = new Producto(item[0], item[1], item[2], item[3], item[4], item[5], null)
+    if(!this.head){
+      this.head = nuevo
+    } else{
+      let aux = this.head
+      while (aux.next){
+        aux = aux.next
       }
+      aux.next = nuevo
     }
+    this.size++
   }
 
-  listar()
+  eliminarCodigo(item)
   {
-    for(let i=0; i!=20 && i!=longitud;i++)
+    if(this.size==1) { this.head = null}
+    else if(this.head==item){ this.head = this.head.next}
+    else{ 
+    let aux = this.head
+    while(aux.next!=item)
     {
-      res.innerHTML += v[i][0]+" "+v[i][1]+" "+v[i][2]+" "+v[i][3]+" "+v[i][4]+" "+v[i][5]+"</br >"
+      aux=aux.next
     }
+    if(aux.next.next){aux.next = aux.next.next}
+    else {aux.next=null}
+    }
+    this.size--;
   }
-  listarInv()
+
+  recorrer(producto)
   {
-    for(let i=longitud-1; i!=-1;i--)
-    {
-      res.innerHTML += v[i][0]+" "+v[i][1]+" "+v[i][2]+" "+v[i][3]+" "+v[i][4]+" "+v[i][5]+"</br >"
-    }
+    if(producto==null) {return this.head}
+    else { return producto.next}
   }
 
-  remove(xd){
-
-      for(let i=xd; i!=longitud-1;i++)
-      {
-        v[i] = new Array (v[i+1][0],v[i+1][1],v[i+1][2],v[i+1][3],v[i+1][4],v[i+1][5])
-      }
-    
+  insert(pos, item)
+  {
+    let nuevo = new Producto(item[0], item[1], item[2], item[3], item[4], item[5], pos.next)
+    pos.next = nuevo
+    this.size++
   }
 
+  agregarInicio(item)
+  {
+    let nuevo = new Producto(item[0], item[1], item[2], item[3], item[4], item[5], this.head)
+    List.head = nuevo
+    this.size++
+  }
+
+  EliminarInicio()
+  {
+    if(this.size>1) {List.head = List.head.next;}
+    this.size--
+  }
 }
-let c = new Main()
-c.llenar()
+
+
+
+const List = new Lista()  
+
 BtnEj1.addEventListener("click", () => {
-  if(longitud!=20 && c.check()==false)
+  if(List.check(codigo.value)==false)
   {
-    console.log(longitud)
-    v[longitud] = new Array (codigo.value,nombre.value,desc.value,cantidad.value,costo.value,(Number(cantidad.value) * Number(costo.value)))
-    res.innerHTML = v[longitud][0]+" "+v[longitud][1]+" "+v[longitud][2]+" "+v[longitud][3]+" "+v[longitud][4]+" "+v[longitud][5]+ "</br > Agregado con exito"
-    longitud++
+    let v = new Array (codigo.value,nombre.value,desc.value,cantidad.value,costo.value,(Number(cantidad.value) * Number(costo.value)))
+    List.agregarFinal(v)
+    res.innerHTML = v[0]+" "+v[1]+" "+v[2]+" "+v[3]+" "+v[4]+" "+v[5]+ "</br > Agregado con exito"
     }
   else{
-  alert("El inventario esta lleno o el codigo esta repetido.")
+  alert("El codigo esta repetido.")
   }
 
 });
 
 BtnEj2.addEventListener("click", () => {
-  if(c.check()==true)
+  let xd = List.search(codigo.value)
+  if(xd!=null)
   {
-    let xd = c.search()
-    res.innerHTML = v[xd][0]+" "+v[xd][1]+" "+v[xd][2]+" "+v[xd][3]+" "+v[xd][4]+" "+v[xd][5]+ "</br > Eliminado con exito"
-    v[xd] = new Array ()
-    c.remove(xd)
-    longitud--;
+    res.innerHTML = xd.codigo+" "+xd.nombre+" "+xd.desc+" "+xd.cantidad+" "+xd.costo+" "+xd.total+" "+ "</br > Eliminado con exito"
+    List.eliminarCodigo(xd)
   }
   else{
     alert("el producto seleccionado no existe")
@@ -107,10 +151,10 @@ BtnEj2.addEventListener("click", () => {
 });
 
 BtnEj3.addEventListener("click", () => {
-  if(c.check()==true)
+  let xd = List.search(codigo.value)
+  if(xd!=null)
   {
-    let xd = c.search()
-    res.innerHTML = v[xd][0]+" "+v[xd][1]+" "+v[xd][2]+" "+v[xd][3]+" "+v[xd][4]+" "+v[xd][5]+ "</br > Busqueda exitosa"
+    res.innerHTML = xd.codigo+" "+xd.nombre+" "+xd.desc+" "+xd.cantidad+" "+xd.costo+" "+xd.total+" "+ "</br > El producto ha sido encontrado!"
   }
   else{
     alert("el producto que busca no existe")
@@ -119,43 +163,74 @@ BtnEj3.addEventListener("click", () => {
 
 BtnEj4.addEventListener("click", () => {
   res.innerHTML = ""
-  c.listar()
+  let aux = null
+  for(let i=0;i!=List.size;i++)
+  {
+    aux = List.recorrer(aux)
+    res.innerHTML += aux.codigo+" "+aux.nombre+" "+aux.desc+" "+aux.cantidad+" "+aux.costo+" "+aux.total+" "+ "</br >"
+  }
   res.innerHTML += "Lista terminada"
 });
 
 BtnEj5.addEventListener("click", () => {
   res.innerHTML = ""
-  c.listarInv()
+  let aux = null
+  let v = new Array()
+  for(let i=0;i!=List.size;i++)
+  {
+    aux = List.recorrer(aux)
+    v[i] = aux
+  }
+  for(let i=List.size-1;i!=-1;i--)
+  {
+    res.innerHTML += v[i].codigo+" "+v[i].nombre+" "+v[i].desc+" "+v[i].cantidad+" "+v[i].costo+" "+v[i].total+ "</br >"
+  }
   res.innerHTML += "Lista terminada"
 });
 
 BtnEj6.addEventListener("click", () => {
-if(longitud==19)
-{
-  alert("el inventario esta lleno")
-}
-else if(c.check()==true)
-{
-  alert("el codigo ingresado ya esta siendo utilizado")
-}
-else if(Number(pos.value) > longitud)
-{
-  alert("no hay datos en esa posicion aun")
-}
-else{
-  let xd = Number(pos.value)
-  let aux = new Array(v[xd][0],v[xd][1],v[xd][2],v[xd][3],v[xd][4],v[xd][5])
-  v[xd] = new Array (codigo.value,nombre.value,desc.value,cantidad.value,costo.value,(Number(cantidad.value) * Number(costo.value)))
-  for(let i=xd+1;i!=longitud+2;i++)
-  {
-    aux2 = new Array(v[i][0],v[i][1],v[i][2],v[i][3],v[i][4],v[i][5])
-    v[i] = aux;
-    aux = aux2
-    
+ if(List.check(codigo.value)==true)
+  {alert("el codigo ingresado ya esta siendo utilizado")}
+  else if(Number(pos.value) > List.size)
+  {alert("no hay datos en esa posicion aun")}
+  else{
+    let position = Number(pos.value)
+    let aux = null
+    let v = new Array (codigo.value,nombre.value,desc.value,cantidad.value,costo.value,(Number(cantidad.value) * Number(costo.value)))
+    for(let i=0; i!=position;i++)
+    {
+      aux = List.recorrer(aux)
+      if(i+1==position){
+        List.insert(aux,v)
+      }
+    }
+    res.innerHTML = v[0]+" "+v[1]+" "+v[2]+" "+v[3]+" "+v[4]+" "+v[5]+ "</br > Insertado con exito"
   }
-  longitud++
-  res.innerHTML = v[xd][0]+" "+v[xd][1]+" "+v[xd][2]+" "+v[xd][3]+" "+v[xd][4]+" "+v[xd][5]+ "</br > Insertado con exito"
-}
+  });
+
+BtnEj7.addEventListener("click", () => {
+  if(List.check(codigo.value)==false)
+  {
+    let v = new Array (codigo.value,nombre.value,desc.value,cantidad.value,costo.value,(Number(cantidad.value) * Number(costo.value)))
+    List.agregarInicio(v)
+    res.innerHTML = v[0]+" "+v[1]+" "+v[2]+" "+v[3]+" "+v[4]+" "+v[5]+ "</br > Agregado con exito"
+    }
+  else{
+  alert("El codigo esta repetido.")
+  }
+  
 });
 
-
+BtnEj8.addEventListener("click", () => {
+  if(List.head)
+  {
+    let aux = List.recorrer(null)
+    res.innerHTML = aux.codigo+" "+aux.nombre+" "+aux.desc+" "+aux.cantidad+" "+aux.costo+" "+aux.total+" "+ "</br >  Eliminado con exito!"
+    List.EliminarInicio()
+    
+    }
+  else{
+  alert("No hay productos aun.")
+  }
+  
+});
